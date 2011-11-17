@@ -7,7 +7,12 @@ TEMPLATE_DEBUG = DEBUG
 import os, sys
 here = lambda path: os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
 
-sys.path.insert(0, here('..\\..'))
+# XXX 
+# Remove this in future
+if os.name == "posix": 
+    sys.path.insert(0, here('../..'))
+else: 
+    sys.path.insert(0, here('..\\..'))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -163,3 +168,7 @@ LOGGING = {
         },
     }
 }
+
+import logging
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
