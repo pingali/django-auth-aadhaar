@@ -5,6 +5,6 @@ class AadhaarAuthForm(forms.Form):
                                  label="Aadhaar Number")
     aadhaar_auth_type = forms.ChoiceField(choices=(('Pi', 'Name'),
                                                    ('Pa', 'Address')))
-    aadhaar_name = forms.CharField(max_length=12, label="Name")
+    aadhaar_name = forms.CharField(max_length=120, label="Name")
     aadhaar_address = forms.CharField(max_length=120, label="Address")
     
