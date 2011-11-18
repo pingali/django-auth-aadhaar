@@ -14,13 +14,15 @@ def login_user(request):
 
     # Clean data from 
     if request.POST:
+        form = AadhaarAuthForm(request.POST) 
+        credentials = form.cleaned_data 
+        # cleanup and extract the aadhaar 
         auth_params = {} 
-        for k,v in request.POST.iteritems():
-            k = k.__str__() 
-            v = v.__str__() 
-            auth_params[k] = v
-
-        user = authenticate(**auth_params) 
+        for k,v in credentials.iteritems():
+            if k.startswith('aadhaar'):
+                auth_params[k] = v
+        print auth_params 
+        user = auth.authenticate(**auth_params) 
         if user is not None:
             if user.is_active:
                 login(request, user)

@@ -113,7 +113,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (     
-    #'django_auth_ldap.backend.ActiveDirectoryGroupMembershipSSLBackend',     
     'django_auth_aadhaar.backend.AadhaarBackend',
     #'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend' 
