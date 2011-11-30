@@ -29,7 +29,12 @@ class AadhaarBackend(backends.ModelBackend):
     def authenticate(self, **credentials):
         print "AadhaarBackend.authenticate()" 
         print "Credentials = ", credentials 
-        aadhaar_id = credentials['aadhaar_id']
+        try: 
+            aadhaar_id = credentials['aadhaar_id']
+        except: 
+            # Aadhaar id does not exist. 
+            return None 
+
         try:
             aadhaar_user = AadhaarBackendHelper(self, aadhaar_id=aadhaar_id)
             user = None 
@@ -246,7 +251,7 @@ class AadhaarSettings(object):
         
         cfg_file = getattr(self, 'AADHAAR_CONFIG_FILE') 
         if cfg_file == None or not (os.path.isfile(cfg_file)): 
-            raise Exception("Please define AADHAAR_CONFIG_FILE") 
+            raise Exception("AADHAAR_CONFIG_FILE is either undefined or does not exist") 
         
         c = AuthConfig(cfg=cfg_file)
         self.cfg = c.update_config()

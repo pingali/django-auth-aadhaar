@@ -6,7 +6,7 @@ class AadhaarUserProfile(models.Model):
     user = models.OneToOneField(User) 
 
     # Aadhaar number..
-    aadhaar_id = models.CharField(max_length=12, default=0) 
+    aadhaar_id = models.CharField(max_length=12, default="0") 
 
     #Time stamps 
     first_authentication = models.DateTimeField(auto_now_add=True) 
@@ -17,6 +17,12 @@ class AadhaarUserProfile(models.Model):
     num_successful_authentications = models.IntegerField(default=0)
     num_unsuccessful_authentications = models.IntegerField(default=0)
     
+    def is_valid_aadhaar(self): 
+        if (self.aadhaar_id == "0"):
+            return False 
+        else:
+            return True
+
 class AadhaarAuthResults(models.Model): 
     profile = models.ForeignKey(AadhaarUserProfile) 
     
