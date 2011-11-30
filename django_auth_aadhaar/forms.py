@@ -5,8 +5,21 @@ class AadhaarAuthForm(forms.Form):
     # Required fields. 
     ATTRIBUTE_CHOICES=(
         ("aadhaar_name", "Name"),
-        ("aadhaar_dob", "Date of Birth"),
-        ("aadhaar_email", "Email")
+        ('aadhaar_dob', "Date of Birth"),
+        ('aadhaar_gender',"Gender"), 
+        ('aadhaar_email', "Email"),
+        ('aadhaar_phone', "Phone"),
+        ('aadhaar_co', "Care of"),
+        ('aadhaar_house', "House"),
+        ('aadhaar_street', "Street"), 
+        ('aadhaar_landmark', "Landmark"), 
+        ('aadhaar_locality', "Locality"), 
+        ('aadhaar_vtc', "VTC"),
+        ('aadhaar_subdist', "Sub-District"), 
+        ('aadhaar_district', "District"),
+        ('aadhaar_state', "State"),
+        ('aadhaar_pincode', "Pincode"),
+        ('aadhaar_postoffice', "Post Office"),
         )
     aadhaar_id = forms.CharField(max_length=12, 
                                  label="Aadhaar Number",
@@ -40,34 +53,34 @@ class AadhaarAuthForm(forms.Form):
                                   input_formats=['%Y', '%Y-%m-%d'])
     aadhaar_email = forms.EmailField(max_length=64, label="Email", 
                                      required=False)
-    aadhaar_phone = forms.IntegerField(max_length=10, label="Phone", 
+    aadhaar_phone = forms.IntegerField(label="Phone", 
                                      required=False)
     
     # => Address 
     #<Pa ms="E" co="" house="" street="" lm="" loc=""
     # vtc="" subdist="" dist="" state="" pc="" po=""/>
     aadhaar_co = forms.CharField(max_length=120, label="Careof", 
-                                 default="", required=False)
+                                 required=False)
     aadhaar_house = forms.CharField(max_length=120, label="House", 
-                                     default="",   required=False)
+                                    required=False)
     aadhaar_street = forms.CharField(max_length=120, label="Street", 
-                                     default="",   required=False)
+                                     required=False)
     aadhaar_landmark = forms.CharField(max_length=120, label="Landmark", 
-                                       default="", required=False)
+                                       required=False)
     aadhaar_locality = forms.CharField(max_length=120, label="Locality", 
-                                       default="",   required=False)
+                                       required=False)
     aadhaar_vtc = forms.CharField(max_length=40, label="VTC", 
-                                  default="",   required=False)
+                                  required=False)
     aadhaar_subdist = forms.CharField(max_length=40, label="Sub-District", 
-                                      default="",   required=False)    
+                                      required=False)    
     aadhaar_district= forms.CharField(max_length=40, label="District", 
-                                      default="",   required=False)    
+                                      required=False)    
     aadhaar_state = forms.CharField(max_length=140, label="State", 
-                                    default="",   required=False)
-    aadhaar_pincode = forms.IntegerField(max_length=6, label="State", 
-                                     default=0,   required=False)
+                                    required=False)
+    aadhaar_pincode = forms.IntegerField(label="State", 
+                                     required=False)
     aadhaar_postoffice = forms.CharField(max_length=40, label="PostOffice", 
-                                         default="",   required=False)
+                                         required=False)
     def clean(self):
         
         attributes = self.cleaned_data['aadhaar_attributes']
