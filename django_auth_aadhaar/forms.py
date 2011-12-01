@@ -3,35 +3,16 @@ from django import forms
 class AadhaarAuthForm(forms.Form):
 
     PII_ATTRIBUTES=(
-        'aadhaar_pi_match',
-        'aadhaar_name',
-        'aadhaar_dob', 
-        'aadhaar_age',
-        'aadhaar_gender',
-        'aadhaar_email',
-        'aadhaar_phone',
-        )
-    PA_ATTRIBUTES=(
-        'aadhaar_pa_match',
-        'aadhaar_co',
-        'aadhaar_house',
-        'aadhaar_street',
-        'aadhaar_landmark',
-        'aadhaar_locality',
-        'aadhaar_vtc',
-        'aadhaar_subdist',
-        'aadhaar_district',
-        'aadhaar_state',
-        'aadhaar_pincode',
-        'aadhaar_postoffice')
-    
-    # Required fields. 
-    ATTRIBUTE_CHOICES=(
+        ('aadhaar_pi_match', "PII Match Strategy"),
         ("aadhaar_name", "Name"),
         ('aadhaar_dob', "Date of Birth"),
+        ('aadhaar_age', "Age"),
         ('aadhaar_gender',"Gender"), 
         ('aadhaar_email', "Email"),
         ('aadhaar_phone', "Phone"),
+        )
+    PA_ATTRIBUTES=(
+        ('aadhaar_pa_match', "PA Match Strategy"),
         ('aadhaar_co', "Care of"),
         ('aadhaar_house', "House"),
         ('aadhaar_street', "Street"), 
@@ -44,15 +25,39 @@ class AadhaarAuthForm(forms.Form):
         ('aadhaar_pincode', "Pincode"),
         ('aadhaar_postoffice', "Post Office"),
         )
-    aadhaar_id = forms.CharField(max_length=12, 
-                                 label="Aadhaar Number",
-                                 help_text="12 digit Aadhaar number")
-    aadhaar_attributes = \
-        forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, 
+
+    def __init__(self, *args, **kwargs):
+        print "AadhaarAuthForm detail = "
+        print "kwargs = ", kwargs
+        print "args = ", args 
+        try: 
+            detail = kwargs.pop('detail', None)
+            if (detail not in ['personal', 'address', 'advanced']):
+                raise Exception("Invalid detail")
+        except:
+            raise forms.ValidationError("Invalid form detail requested")
+
+        super(AadhaarAuthForm, self).__init__(*args, **kwargs)
+
+        self.detail = detail
+
+        if detail == "personal": 
+            ATTRIBUTE_CHOICES = AadhaarAuthForm.PII_ATTRIBUTES[1:]
+        elif detail == "address":
+            ATTRIBUTE_CHOICES = AadhaarAuthForm.PA_ATTRIBUTES[1:]
+        else:
+            ATTRIBUTE_CHOICES = AadhaarAuthForm.PII_ATTRIBUTES[1:] + AadhaarAuthForm.PA_ATTRIBUTES[1:]
+
+        self.fields['aadhaar_attributes'] = \
+            forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, 
                                   label="Authentication Parameters",
                                   choices=ATTRIBUTE_CHOICES,
                                   help_text="Please select one or more of attributes you wish to authenticate",
                                   required=True)
+    
+    aadhaar_id = forms.CharField(max_length=12, 
+                                 label="Aadhaar Number",
+                                 help_text="12 digit Aadhaar number")
 
     # Personally identifiable information
     PI_MATCH_CHOICES =(
@@ -75,6 +80,8 @@ class AadhaarAuthForm(forms.Form):
                                   required=False,
                                   help_text="Date of Birth (format: YYYY or YYYY-MM-DD)",
                                   input_formats=['%Y', '%Y-%m-%d'])
+    aadhaar_age = forms.IntegerField(label="Age", 
+                                     required=False)
     aadhaar_email = forms.EmailField(max_length=64, label="Email", 
                                      required=False)
     aadhaar_phone = forms.IntegerField(label="Phone", 
@@ -117,7 +124,7 @@ class AadhaarAuthForm(forms.Form):
         """
         Get the label for an attribute name
         """
-        for e in AadhaarAuthForm.ATTRIBUTE_CHOICES: 
+        for e in AadhaarAuthForm.PII_ATTRIBUTES + AadhaarAuthForm.PA_ATTRIBUTES:
             if e[0] == attr_name: 
                 return e[1] 
         return None 
@@ -139,19 +146,27 @@ class AadhaarAuthForm(forms.Form):
                 raise forms.ValidationError("Pincode, if specified, " + 
                                             "should be > 100000")
 
-        matchers = [] 
+        if 'aadhaar_age' in attributes: 
+            age= self.cleaned_data['aadhaar_age']
+            if ((age == 0) or ( age > 110)):
+                raise forms.ValidationError("Invalid age specified")
+            
+        # Make sure match strategies are included. 
+        match_strategies = [] 
+        valid_pi_attributes = [x[0] for x in AadhaarAuthForm.PII_ATTRIBUTES]
+        valid_pa_attributes = [x[0] for x in AadhaarAuthForm.PA_ATTRIBUTES]
         for attribute in attributes:
-            if ((attribute in AadhaarAuthForm.PII_ATTRIBUTES) and 
-                ('aadhaar_pi_match' not in matchers)):
-                matchers += ['aadhaar_pi_match'] 
+            if ((attribute in valid_pi_attributes) and 
+                ('aadhaar_pi_match' not in match_strategies)):
+                match_strategies += ['aadhaar_pi_match'] 
 
-            if ((attribute in AadhaarAuthForm.PA_ATTRIBUTES) and 
-                ('aadhaar_pa_match' not in matchers)):
-                matchers += ['aadhaar_pa_match'] 
+            if ((attribute in valid_pa_attributes) and 
+                ('aadhaar_pa_match' not in match_strategies)):
+                match_strategies += ['aadhaar_pa_match'] 
 
-        print "match strategies = ", matchers 
-        attributes += matchers 
-        print "after adding matchers ", attributes 
+        print "match strategies = ", match_strategies 
+        attributes += match_strategies 
+        print "after adding match_strategies ", attributes 
         for attribute in attributes:
             humanized_attribute = AadhaarAuthForm.humanize(attribute) 
             if ((not self.cleaned_data.has_key(attribute)) or 
