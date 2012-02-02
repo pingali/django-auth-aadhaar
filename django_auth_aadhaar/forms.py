@@ -32,7 +32,7 @@ class AadhaarAuthForm(forms.Form):
         print "args = ", args 
         try: 
             detail = kwargs.pop('detail', None)
-            if (detail not in ['personal', 'address', 'advanced']):
+            if (detail not in ['personal', 'address', 'all']):
                 raise Exception("Invalid detail")
         except:
             raise forms.ValidationError("Invalid form detail requested")
